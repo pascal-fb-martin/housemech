@@ -1,30 +1,33 @@
 # This script is intended for testing HouseMech.
-# The HouseSimio service must be running (and serving points feed1 and feed2).
+# Dependencies:
+# The Housesaga service must be running.
+# The HouseDepot service must be running and hold this script.
+# The HouseSimio service must be running and serving points mech1 and mech2.
 
 proc EVENT.SCRIPT.mechrules.tcl {action} {
     puts "================ Script mechrules.tcl $action completed"
-    House::control start feed2
+    House::control start mech2
 }
 
-proc POINT.feed2 {state} {
-    puts "================ Control feed2 changed to $state"
-    puts "================ State of point feed1 is [House::control state feed1]"
+proc POINT.mech2 {state} {
+    puts "================ Control mech2 changed to $state"
+    puts "================ State of point mech1 is [House::control state mech1]"
     if {$state == "on"} {
-        puts "================ Activating point feed1"
-        House::control start feed1 10 "ON feed2 CHANGE TO ON"
-        House::event new POINT feed1 PULSE "AFTER DETECTING feed2"
+        puts "================ Activating point mech1"
+        House::control start mech1 10 "ON mech2 CHANGE TO ON"
+        House::event new POINT mech1 PULSE "AFTER DETECTING mech2"
     }
     puts "================ Last action for event SCRIPT mechrules.tcl: [House::event state SCRIPT mechrules.tcl]"
 }
 
-proc POINT.feed1 {state} {
+proc POINT.mech1 {state} {
     switch -exact $state {
         on {
-            House::control cancel feed2 "ON feed1 CHANGE to ON"
+            House::control cancel mech2 "ON mech1 CHANGE to ON"
         }
         off {
             # Don't do an exit like this in a real "production" trigger..
-            puts "================ Exit controlled by feed1"
+            puts "================ Exit controlled by mech1"
             exit 0
         }
     }

@@ -106,3 +106,22 @@ This returns the known state of the control point, or an empty string if the sta
 
 This service does not really have a web interface at this time, beside accessing its internal events.
 
+## Test
+
+The HouseDepot service must be running.
+
+The HouseSaga service must be running (no special configuration is needed).
+
+On a separate terminal, load the SimIO test configuration _from the housetest project_ in HouseDepot and then run the housesimio service:
+```
+housedepositor config simio.json simio.json
+./housesimio
+```
+
+Load the HouseMech test rules in HouseDepot:
+```
+housedepositor scripts mechrules.tcl test/mechrules.tcl
+```
+
+Run HouseMech using the `test/runmech` script. The test will stop on its own when the success criteria defined in `test/mechrules.tcl` will be met.
+
