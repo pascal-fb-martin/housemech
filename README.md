@@ -6,7 +6,7 @@ A home web service to automate actions on external events.
 
 A micro service that executes user scripts as triggers on specific events or control point changes.
 
-The plan is to add more external trigger and action types in the future (like starting events in Motion).
+Any event initiated by any House service can be used as a trigger. This includes events initiated by a CCTV service (e.g. HouseMotion): lights, or other devices, may be turned on and off based on camera motion detection.
 
 This project depends on [echttp](https://github.com/pascal-fb-martin/echttp) and [houseportal](https://github.com/pascal-fb-martin/houseportal). It accepts all standard options of echttp and the houseportal client runtime. See these two projects for more information.
 
@@ -80,7 +80,7 @@ An automation trigger script may access the following Tcl commands:
 ```
 House::event {"state" category name}
 ```
-This returns the last detected action for the specified event. This can be used to execute some logic only when multiple conditions are met, i.e. after detection of a sequence  or combination of events.
+This returns the last detected action for the specified event. This can be used to execute some logic only when multiple conditions are met, i.e. after detection of a sequence or combination of events.
 
 ```
 House::event {"new" category name {action ""} {description ""}}
@@ -101,6 +101,14 @@ This sets the specified control point to "off". The reason parameter will be ref
 House::control {"state" name}
 ```
 This returns the known state of the control point, or an empty string if the state is not known. There might be a delay between executin a control and the state changing: the state always represent the actual state of the control point as reported by the service handling the point.
+
+## Note about Motion Detection
+
+If a light is turned on or off based on camera motion detection, it is imperative to test for, and avoid, any unintended feedback loop, as the control of the light might trigger a new motion detection.
+
+When using the Motion project coupled with the HouseMotion service, it is recommended to use the `lightswitch_percent` and `lightswitch_frames` options in file motion.conf to block the feedback. These two options are meant to prevent motion detection when a wide change of luminosity occurs, like at sunset or sunrise, or when a light turns on or off.
+
+A similar feedback loop could occur when using other light-based motion detection devices, such as an infrared sensor.
 
 ## Interface
 
