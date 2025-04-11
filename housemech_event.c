@@ -124,7 +124,6 @@ static void housemech_event_response
         houselog_trace (HOUSE_FAILURE, provider, "No host name");
         goto failure;
     }
-    const char *servername = tokens[server].value.string;
 
     int latest = echttp_json_search (tokens, ".saga.latest");
     if (latest < 0) {
@@ -230,7 +229,6 @@ static void housemech_event_check_response
         houselog_trace (HOUSE_FAILURE, provider, "No host name");
         goto failure;
     }
-    const char *servername = tokens[server].value.string;
 
     int latest = echttp_json_search (tokens, ".saga.latest");
     if (latest < 0) {

@@ -236,7 +236,7 @@ static const char *housemech_printable_period (int h, const char *hlabel,
 }
 
 static const char *housemech_printable_duration (int duration) {
-    static char Printable[128];
+
     if (duration <= 0) return "NOW";
     if (duration > 86400) {
         return housemech_printable_period (duration / 86400, "DAY",
@@ -288,7 +288,7 @@ int housemech_control_start (const char *name, int pulse, const char *reason) {
                         "USING %s (%s)", control->url, reason);
     }
 
-    static char url[256];
+    static char url[600];
     snprintf (url, sizeof(url),
               "%s/set?point=%s&state=on&pulse=%d%s",
               control->url, name, pulse, housemech_control_cause(reason));
@@ -310,7 +310,7 @@ static void housemech_control_stop (HouseControl *control, const char *reason) {
 
     if (! control->url[0]) return;
 
-    static char url[256];
+    static char url[600];
     snprintf (url, sizeof(url),
               "%s/set?point=%s&state=off%s",
               control->url, control->name, housemech_control_cause(reason));
@@ -361,11 +361,6 @@ static void housemech_control_discovered
                (void *origin, int status, char *data, int length) {
 
    const char *provider = (const char *) origin;
-   ParserToken tokens[100];
-   int  innerlist[100];
-   char path[256];
-   int  count = 100;
-   int  i;
 
    status = echttp_redirected("GET");
    if (!status) {

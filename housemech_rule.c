@@ -117,7 +117,7 @@ static int housemech_rule_control_cmd (ClientData clientData,
         int pulse = 0;
         if (objc >= 4) {
             if (Tcl_GetIntFromObj (interp, objv[3], &pulse) != TCL_OK) {
-                DEBUG ("Invalid pulse %s: \n", Tcl_GetString (objv[3]), Tcl_GetStringResult(interp));
+                DEBUG ("Invalid pulse %s: %s\n", Tcl_GetString (objv[3]), Tcl_GetStringResult(interp));
                 Tcl_SetResult (interp, "invalid pulse", TCL_STATIC);
                 return TCL_ERROR;
             }

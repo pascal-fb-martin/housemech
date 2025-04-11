@@ -36,7 +36,7 @@ clean:
 rebuild: clean all
 
 %.o: %.c
-	gcc -c -g -Os -I/usr/include/tcl -o $@ $<
+	gcc -c -Wall -g -Os -I/usr/include/tcl -o $@ $<
 
 housemech: $(OBJS)
 	gcc -Os -o housemech $(OBJS) -lhouseportal -lechttp -ltcl -lssl -lcrypto -lm -lrt

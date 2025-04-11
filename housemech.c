@@ -73,7 +73,6 @@ static void housemech_background (int fd, int mode) {
 
     static time_t LastCall = 0;
     time_t now = time(0);
-    time_t yesterday = now - (24 * 3600);
 
     if (now == LastCall) return;
     LastCall = now;
@@ -111,7 +110,6 @@ int main (int argc, const char **argv) {
     dup(open ("/dev/null", O_WRONLY));
 
     int i;
-    const char *value;
     for (i = 1; i < argc; ++i) {
         if (echttp_option_present ("-d", argv[i])) {
             Debug = 1;
