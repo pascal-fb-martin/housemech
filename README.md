@@ -102,6 +102,18 @@ House::control {"state" name}
 ```
 This returns the known state of the control point, or an empty string if the state is not known. There might be a delay between executin a control and the state changing: the state always represent the actual state of the control point as reported by the service handling the point.
 
+```
+House::sunset
+```
+This returns the sunset time for the upcoming night (in daytime) or current night (in night time).
+
+```
+House::sunrise
+```
+This returns the sunrise time for the upcoming night (in daytime) or current night (in night time).
+
+It is night time if `( [clock seconds] > [House::sunset] ) && [clock seconds] < [House::sunrise] )`.
+
 ## Note about Motion Detection
 
 If a light is turned on or off based on camera motion detection, it is imperative to test for, and avoid, any unintended feedback loop, as the control of the light might trigger a new motion detection.

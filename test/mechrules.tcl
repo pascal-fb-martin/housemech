@@ -6,6 +6,16 @@
 
 proc EVENT.SCRIPT.mechrules.tcl {action} {
     puts "================ Script mechrules.tcl $action completed"
+    puts "Sunset: [clock format [House::sunset]]"
+    puts "Sunrise: [clock format [House::sunrise]]"
+    set now [clock seconds]
+    if {$now < [House::sunset]} {
+        puts "Still daytime"
+    } elseif {$now > [House::sunrise]} {
+        puts "Night is over"
+    } else {
+        puts "Night time"
+    }
     House::control start mech2
 }
 

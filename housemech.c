@@ -37,6 +37,7 @@
 #include "housemech_event.h"
 #include "housemech_rule.h"
 #include "housemech_control.h"
+#include "housemech_almanac.h"
 
 static int Debug = 0;
 
@@ -97,6 +98,7 @@ static void housemech_background (int fd, int mode) {
 
     housemech_event_background (now);
     housemech_control_background (now);
+    housemech_almanac_background (now);
     housemech_rule_background (now);
 }
 

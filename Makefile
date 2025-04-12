@@ -1,4 +1,4 @@
-# HousecMIs - A simple home web service to calculate an index from CMIS
+# HouseMech - A simple home web service to automate actions.
 #
 # Copyright 2023, Pascal Martin
 #
@@ -23,7 +23,11 @@ SHARE=$(HROOT)/share/house
 
 # Application build. --------------------------------------------
 
-OBJS=housemech.o housemech_event.o housemech_rule.o housemech_control.o
+OBJS=housemech.o \
+     housemech_event.o \
+     housemech_rule.o \
+     housemech_control.o \
+     housemech_almanac.o
 LIBOJS=
 
 all: housemech

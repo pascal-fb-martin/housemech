@@ -1,4 +1,4 @@
-/* HouseMech - a web server for home automation
+/* HouseMech - A simple home web service to automate actions.
  *
  * Copyright 2024, Pascal Martin
  *
@@ -63,6 +63,7 @@
 #include "housedepositor.h"
 
 #include "housemech_control.h"
+#include "housemech_almanac.h"
 #include "housemech_rule.h"
 
 #define DEBUG if (echttp_isdebug()) printf
@@ -149,6 +150,24 @@ static int housemech_rule_control_cmd (ClientData clientData,
     return TCL_OK;
 }
 
+static int housemech_rule_sunset_cmd (ClientData clientData,
+                                      Tcl_Interp *interp,
+                                      int objc,
+                                      Tcl_Obj *const objv[]) {
+
+    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housemech_almanac_sunset()));
+    return TCL_OK;
+}
+
+static int housemech_rule_sunrise_cmd (ClientData clientData,
+                                       Tcl_Interp *interp,
+                                       int objc,
+                                       Tcl_Obj *const objv[]) {
+
+    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housemech_almanac_sunrise()));
+    return TCL_OK;
+}
+
 static void housemech_rule_listener (const char *name, time_t timestamp,
                                       const char *data, int length) {
 
@@ -177,6 +196,12 @@ void housemech_rule_initialize (int argc, const char **argv) {
     Tcl_CreateObjCommand (HouseMechInterpreter,
                  "House::nativeevent", housemech_rule_event_cmd, 0, 0);
 
+    Tcl_CreateObjCommand (HouseMechInterpreter,
+                 "House::sunset", housemech_rule_sunset_cmd, 0, 0);
+
+    Tcl_CreateObjCommand (HouseMechInterpreter,
+                 "House::sunrise", housemech_rule_sunrise_cmd, 0, 0);
+
     housedepositor_subscribe
         ("scripts", HouseMechScript, housemech_rule_listener);
 }
@@ -187,7 +212,7 @@ int housemech_rule_status (char *buffer, int size) {
 }
 
 int housemech_rule_ready (void) {
-    return HouseMechReady;
+    return HouseMechReady && housemech_almanac_ready();
 }
 
 int housemech_rule_trigger_event

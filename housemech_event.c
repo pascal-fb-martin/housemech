@@ -1,4 +1,4 @@
-/* HouseMech - a web server for home automation
+/* HouseMech - A simple home web service to automate actions.
  *
  * Copyright 2024, Pascal Martin
  *
