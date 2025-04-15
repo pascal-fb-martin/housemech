@@ -71,6 +71,7 @@
 #define DEBUG if (echttp_isdebug()) printf
 
 static int    SourcePriority = 0;
+static char   SourceUri[128];
 static time_t SunSet = 0;
 static time_t SunRise = 0;
 
@@ -131,7 +132,7 @@ static void housemech_almanac_update (const char *provider,
        return;
    }
    int priority = tokens[index].value.integer;
-   if (priority < SourcePriority) return; // Lower quality.
+   if (priority <= SourcePriority) return; // Lower quality.
 
    index = echttp_json_search (tokens, ".almanac.sunrise");
    if (index <= 0) {
@@ -149,6 +150,7 @@ static void housemech_almanac_update (const char *provider,
    SunSet = tokens[index].value.integer;
 
    SourcePriority = priority; // Accept the new data.
+   snprintf (SourceUri, sizeof(SourceUri), "%s", provider);
 
    // If this almanac server has location info, remember it.
    index = echttp_json_search (tokens, ".location.timezone");
@@ -239,29 +241,29 @@ int housemech_almanac_status (char *buffer, int size) {
     struct tm sunrise = *localtime (&SunRise);
 
     cursor = snprintf (buffer, size,
-                       ",\"almanac\":{\"priority\":%d,"
-                       "\"sunset\":\"%02d:%02d\",\"sunrise\":\"%02d:%02d\"",
-                       SourcePriority,
+                       ",\"almanac\":{\"priority\":%d,\"provider\":\"%s\""
+                       ",\"sunset\":\"%02d:%02d\",\"sunrise\":\"%02d:%02d\"}",
+                       SourcePriority, SourceUri,
                        sunset.tm_hour, sunset.tm_min,
                        sunrise.tm_hour, sunrise.tm_min);
-    const char *ending = "}";
+
     if (HouseTimeZone[0] || HouseGpsFix) {
         cursor += snprintf (buffer+cursor, size-cursor, ",\"location\":{");
-        ending = "}}";
+
+        const char *sep = "";
+        if (HouseTimeZone[0]) {
+            cursor += snprintf (buffer+cursor, size-cursor,
+                                "%s\"timezone\":\"%s\"", sep, HouseTimeZone);
+            sep = ",";
+        }
+        if (HouseGpsFix) {
+            cursor += snprintf (buffer+cursor, size-cursor,
+                                "%s\"lat\":%1.8f,\"long\":%1.8f",
+                                sep, HouseLatitude, HouseLongitude);
+            sep = ",";
+        }
+        cursor += snprintf (buffer+cursor, size-cursor, "}");
     }
-    const char *sep = "";
-    if (HouseTimeZone[0]) {
-        cursor += snprintf (buffer+cursor, size-cursor,
-                            "%s\"timezone\":\"%s\"", sep, HouseTimeZone);
-        sep = ",";
-    }
-    if (HouseGpsFix) {
-        cursor += snprintf (buffer+cursor, size-cursor,
-                            "%s\"lat\":%1.8f,\"long\":%1.8f",
-                            sep, HouseLatitude, HouseLongitude);
-        sep = ",";
-    }
-    cursor += snprintf (buffer+cursor, size-cursor, ending);
 
     if (cursor >= size) {
         houselog_trace (HOUSE_FAILURE, "STATUS",
