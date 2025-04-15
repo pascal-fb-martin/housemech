@@ -151,15 +151,15 @@ static void housemech_almanac_update (const char *provider,
    SourcePriority = priority; // Accept the new data.
 
    // If this almanac server has location info, remember it.
-   index = echttp_json_search (tokens, ".position.timezone");
+   index = echttp_json_search (tokens, ".location.timezone");
    if (index > 0) {
        const char *value = tokens[index].value.string;
        if (strcmp (value, HouseTimeZone)) {
            snprintf (HouseTimeZone, sizeof(HouseTimeZone), "%s", value);
        }
    }
-   int lat = echttp_json_search (tokens, ".position.lat");
-   int lng = echttp_json_search (tokens, ".position.long");
+   int lat = echttp_json_search (tokens, ".location.lat");
+   int lng = echttp_json_search (tokens, ".location.long");
    if ((lat > 0) && (lng > 0)) {
        HouseLatitude = tokens[lat].value.real;
        HouseLongitude = tokens[lng].value.real;
