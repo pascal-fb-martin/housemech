@@ -74,6 +74,12 @@ static int    SourcePriority = 0;
 static time_t SunSet = 0;
 static time_t SunRise = 0;
 
+// Additional information, not really used here:
+static int    HouseGpsFix = 0;
+static double HouseLatitude = 0.0;
+static double HouseLongitude = 0.0;
+static char   HouseTimeZone[128];
+
 int housemech_almanac_ready (void) {
     return SunSet > 0; // Even if the data has expired.
 }
@@ -143,6 +149,22 @@ static void housemech_almanac_update (const char *provider,
    SunSet = tokens[index].value.integer;
 
    SourcePriority = priority; // Accept the new data.
+
+   // If this almanac server has location info, remember it.
+   index = echttp_json_search (tokens, ".position.timezone");
+   if (index > 0) {
+       const char *value = tokens[index].value.string;
+       if (strcmp (value, HouseTimeZone)) {
+           snprintf (HouseTimeZone, sizeof(HouseTimeZone), "%s", value);
+       }
+   }
+   int lat = echttp_json_search (tokens, ".position.lat");
+   int lng = echttp_json_search (tokens, ".position.long");
+   if ((lat > 0) && (lng > 0)) {
+       HouseLatitude = tokens[lat].value.real;
+       HouseLongitude = tokens[lng].value.real;
+       HouseGpsFix = 1;
+   }
 }
 
 static void housemech_almanac_discovered
@@ -217,11 +239,30 @@ int housemech_almanac_status (char *buffer, int size) {
     struct tm sunrise = *localtime (&SunRise);
 
     cursor = snprintf (buffer, size,
-                       "\"almanac\":{\"priority\":%d,"
-                       "\"sunset\":\"%02d:%02d\",\"sunrise\":\"%02d:%02d\"}",
+                       ",\"almanac\":{\"priority\":%d,"
+                       "\"sunset\":\"%02d:%02d\",\"sunrise\":\"%02d:%02d\"",
                        SourcePriority,
                        sunset.tm_hour, sunset.tm_min,
                        sunrise.tm_hour, sunrise.tm_min);
+    const char *ending = "}";
+    if (HouseTimeZone[0] || HouseGpsFix) {
+        cursor += snprintf (buffer+cursor, size-cursor, ",\"location\":{");
+        ending = "}}";
+    }
+    const char *sep = "";
+    if (HouseTimeZone[0]) {
+        cursor += snprintf (buffer+cursor, size-cursor,
+                            "%s\"timezone\":\"%s\"", sep, HouseTimeZone);
+        sep = ",";
+    }
+    if (HouseGpsFix) {
+        cursor += snprintf (buffer+cursor, size-cursor,
+                            "%s\"lat\":%1.8f,\"long\":%1.8f",
+                            sep, HouseLatitude, HouseLongitude);
+        sep = ",";
+    }
+    cursor += snprintf (buffer+cursor, size-cursor, ending);
+
     if (cursor >= size) {
         houselog_trace (HOUSE_FAILURE, "STATUS",
                         "BUFFER TOO SMALL (NEED %d bytes)", cursor);

@@ -59,6 +59,9 @@ static const char *housemech_status (const char *method, const char *uri,
 
     cursor += housemech_event_status (buffer+cursor, sizeof(buffer)-cursor);
     cursor += housemech_rule_status (buffer+cursor, sizeof(buffer)-cursor);
+    cursor += housemech_almanac_status (buffer+cursor, sizeof(buffer)-cursor);
+
+    snprintf (buffer+cursor, sizeof(buffer)-cursor, "}");
 
     echttp_content_type_json ();
     return buffer;
