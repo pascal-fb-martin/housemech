@@ -237,15 +237,11 @@ int housemech_almanac_status (char *buffer, int size) {
 
     if (SourcePriority <= 0) return 0;
 
-    struct tm sunset = *localtime (&SunSet);
-    struct tm sunrise = *localtime (&SunRise);
-
     cursor = snprintf (buffer, size,
                        ",\"almanac\":{\"priority\":%d,\"provider\":\"%s\""
-                       ",\"sunset\":\"%02d:%02d\",\"sunrise\":\"%02d:%02d\"}",
+                       ",\"sunset\":%lld,\"sunrise\":%lld}",
                        SourcePriority, SourceUri,
-                       sunset.tm_hour, sunset.tm_min,
-                       sunrise.tm_hour, sunrise.tm_min);
+                       (long long)SunSet, (long long)SunRise);
 
     if (HouseTimeZone[0] || HouseGpsFix) {
         cursor += snprintf (buffer+cursor, size-cursor, ",\"location\":{");
