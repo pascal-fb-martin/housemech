@@ -16,7 +16,7 @@ The HouseMech service is entirely configured from a "mechrules.tcl" script. That
 
 ## Installation
 
-To install, following the steps below:
+To install, follow the steps below:
 * Install gcc, git, openssl (libssl-dev), tcl-dev.
 * Install [echttp](https://github.com/pascal-fb-martin/echttp)
 * Install [houseportal](https://github.com/pascal-fb-martin/houseportal)
