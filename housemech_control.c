@@ -70,6 +70,7 @@
 
 #include <echttp.h>
 #include <echttp_json.h>
+#include <echttp_encoding.h>
 
 #include "houselog.h"
 #include "housediscover.h"
@@ -288,10 +289,13 @@ int housemech_control_start (const char *name, int pulse, const char *reason) {
                         "USING %s (%s)", control->url, reason);
     }
 
-    static char url[600];
+    char encoded[64];
+    echttp_encoding_escape (name, encoded, sizeof(encoded));
+
+    static char url[800];
     snprintf (url, sizeof(url),
               "%s/set?point=%s&state=on&pulse=%d%s",
-              control->url, name, pulse, housemech_control_cause(reason));
+              control->url, encoded, pulse, housemech_control_cause(reason));
     const char *error = echttp_client ("GET", url);
     if (error) {
         houselog_trace (HOUSE_FAILURE, name, "cannot create socket for %s, %s", url, error);
@@ -310,10 +314,13 @@ static void housemech_control_stop (HouseControl *control, const char *reason) {
 
     if (! control->url[0]) return;
 
-    static char url[600];
+    char encoded[64];
+    echttp_encoding_escape (control->name, encoded, sizeof(encoded));
+
+    static char url[800];
     snprintf (url, sizeof(url),
               "%s/set?point=%s&state=off%s",
-              control->url, control->name, housemech_control_cause(reason));
+              control->url, encoded, housemech_control_cause(reason));
     const char *error = echttp_client ("GET", url);
     if (error) {
         houselog_trace (HOUSE_FAILURE, control->name, "cannot create socket for %s, %s", url, error);
