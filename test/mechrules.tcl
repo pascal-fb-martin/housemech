@@ -3,11 +3,12 @@
 # The Housesaga service must be running.
 # The HouseDepot service must be running and hold this script.
 # The HouseSimio service must be running and serving points mech1 and mech2.
+#
 
 proc EVENT.SCRIPT.mechrules.tcl {action} {
     puts "================ Script mechrules.tcl $action completed"
-    puts "Sunset: [clock format [House::sunset]]"
-    puts "Sunrise: [clock format [House::sunrise]]"
+    puts "================ Sunset: [clock format [House::sunset]]"
+    puts "================ Sunrise: [clock format [House::sunrise]]"
     set now [clock seconds]
     if {$now < [House::sunset]} {
         puts "Still daytime"

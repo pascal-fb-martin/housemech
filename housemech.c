@@ -33,11 +33,11 @@
 #include "housedepositor.h"
 #include "houselog.h"
 #include "houselog_sensor.h"
+#include "housealmanac.h"
 
 #include "housemech_event.h"
 #include "housemech_rule.h"
 #include "housemech_control.h"
-#include "housemech_almanac.h"
 
 static int Debug = 0;
 
@@ -59,7 +59,7 @@ static const char *housemech_status (const char *method, const char *uri,
 
     cursor += housemech_event_status (buffer+cursor, sizeof(buffer)-cursor);
     cursor += housemech_rule_status (buffer+cursor, sizeof(buffer)-cursor);
-    cursor += housemech_almanac_status (buffer+cursor, sizeof(buffer)-cursor);
+    cursor += housealmanac_status (buffer+cursor, sizeof(buffer)-cursor);
 
     snprintf (buffer+cursor, sizeof(buffer)-cursor, "}");
 
@@ -101,7 +101,7 @@ static void housemech_background (int fd, int mode) {
 
     housemech_event_background (now);
     housemech_control_background (now);
-    housemech_almanac_background (now);
+    housealmanac_background (now);
     housemech_rule_background (now);
 }
 

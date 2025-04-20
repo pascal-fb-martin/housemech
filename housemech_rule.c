@@ -61,9 +61,9 @@
 
 #include "houselog.h"
 #include "housedepositor.h"
+#include "housealmanac.h"
 
 #include "housemech_control.h"
-#include "housemech_almanac.h"
 #include "housemech_rule.h"
 
 #define DEBUG if (echttp_isdebug()) printf
@@ -155,7 +155,7 @@ static int housemech_rule_sunset_cmd (ClientData clientData,
                                       int objc,
                                       Tcl_Obj *const objv[]) {
 
-    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housemech_almanac_sunset()));
+    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housealmanac_sunset()));
     return TCL_OK;
 }
 
@@ -164,7 +164,7 @@ static int housemech_rule_sunrise_cmd (ClientData clientData,
                                        int objc,
                                        Tcl_Obj *const objv[]) {
 
-    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housemech_almanac_sunrise()));
+    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housealmanac_sunrise()));
     return TCL_OK;
 }
 
@@ -212,7 +212,7 @@ int housemech_rule_status (char *buffer, int size) {
 }
 
 int housemech_rule_ready (void) {
-    return HouseMechReady && housemech_almanac_ready();
+    return HouseMechReady && housealmanac_ready();
 }
 
 int housemech_rule_trigger_event

@@ -1,4 +1,4 @@
 #!/bin/bash
 cd `dirname $0`
-../housemech --http-debug
+../housemech --http-debug | tee ../donotcommit/output.txt
 

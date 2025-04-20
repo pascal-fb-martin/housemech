@@ -26,8 +26,7 @@ SHARE=$(HROOT)/share/house
 OBJS=housemech.o \
      housemech_event.o \
      housemech_rule.o \
-     housemech_control.o \
-     housemech_almanac.o
+     housemech_control.o
 LIBOJS=
 
 all: housemech
