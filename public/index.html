@@ -2,6 +2,88 @@
 <html>
 <head>
 <link rel=stylesheet type="text/css" href="/house.css" title="House">
+<script>
+function shortTime (time) {
+    return time.toLocaleString().split(' GMT')[0];
+}
+
+function mechUpdate (response) {
+
+    var title = response.host+' - Mech';
+    document.getElementsByTagName ('title')[0].innerHTML = title;
+
+    if (response.location) {
+        var lat = response.location.lat;
+        var long = response.location.long;
+        if (lat && long) {
+            document.getElementById('latitude').innerHTML = lat;
+            document.getElementById('longitude').innerHTML = long;
+        } else {
+            document.getElementById('latitude').innerHTML = '';
+            document.getElementById('longitude').innerHTML = '';
+        }
+        var timezone = response.location.timezone;
+        if (timezone) {
+            document.getElementById('timezone').innerHTML = timezone;
+        } else {
+            document.getElementById('timezone').innerHTML = '';
+        }
+    } else {
+        document.getElementById('latitude').innerHTML = '';
+        document.getElementById('longitude').innerHTML = '';
+        document.getElementById('timezone').innerHTML = '';
+    }
+
+    if (response.almanac) {
+        if (response.almanac.priority) {
+            document.getElementById('priority').innerHTML = response.almanac.priority;
+        } else {
+            document.getElementById('priority').innerHTML = '';
+        }
+        if (response.almanac.provider) {
+            document.getElementById('provider').innerHTML = response.almanac.provider;
+        } else {
+            document.getElementById('provider').innerHTML = '';
+        }
+        if (response.almanac.sunset) {
+            var sunset = new Date (response.almanac.sunset * 1000);
+            document.getElementById('sunset').innerHTML = shortTime(sunset);
+        } else {
+            document.getElementById('sunset').innerHTML = '';
+        }
+        if (response.almanac.sunrise) {
+            var sunrise = new Date (response.almanac.sunrise * 1000);
+            document.getElementById('sunrise').innerHTML = shortTime(sunrise);
+        } else {
+            document.getElementById('sunrise').innerHTML = '';
+        }
+    } else {
+        document.getElementById('priority').innerHTML = '';
+        document.getElementById('provider').innerHTML = '';
+        document.getElementById('sunset').innerHTML = '';
+        document.getElementById('sunrise').innerHTML = '';
+    }
+    var sysdate = new Date (response.timestamp * 1000);
+    document.getElementById('localtime').innerHTML = shortTime(sysdate);
+}
+
+function mechInfo () {
+
+    var command = new XMLHttpRequest();
+    command.open("GET", "/mech/status");
+    command.onreadystatechange = function () {
+        if (command.readyState === 4 && command.status === 200) {
+            mechUpdate(JSON.parse(command.responseText));
+        }
+    }
+    command.send(null);
+}
+
+window.onload = function() {
+   mechInfo();
+   setInterval (mechInfo, 1000);
+}
+</script>
 <title></title>
 </head>
 <body>
@@ -10,9 +92,41 @@
    <table class="housetop">
    <tr>
    <td><span>Status</span></td>
-   <td><a id="portal" href="/mech/events.html">Events</a></td>
+   <td><a href="/mech/events.html">Events</a></td>
    </tr>
    </table> 
+   </td></tr>
+   </table> 
+   <table class="housepanel">
+   <tr><td>
+   <div class="housepane">
+   <table class="housestatus">
+   <tr><td colspan="2"><span class="housetitle">Location</span></td></tr>
+   <tr><td>Latitude:</td>
+   <td><span class="housedata" id="latitude"></span></td></tr>
+   <tr><td>Longitude:</td>
+   <td><span class="housedata" id="longitude"></span></td></tr>
+   <tr><td>Time Zone:</td>
+   <td><span class="housedata" id="timezone"></span></td></tr>
+   </table>
+   </div>
+   </td></tr>
+   <tr><td>
+   <div class="housepane">
+   <table class="housestatus">
+   <tr><td colspan="2"><span class="housetitle">Almanac</span></td></tr>
+   <tr><td>Priority:</td>
+   <td><span class="housedata" id="priority"></span></td></tr>
+   <tr><td>Provider:</td>
+   <td><span class="housedata" id="provider"></span></td></tr>
+   <tr><td>Sunset:</td>
+   <td><span class="housedata" id="sunset"></span></td></tr>
+   <tr><td>Sunrise:</td>
+   <td><span class="housedata" id="sunrise"></span></td></tr>
+   <tr><td>localtime:</td>
+   <td><span class="housedata" id="localtime"></span></td></tr>
+   </table>
+   </div>
    </td></tr>
    </table> 
 </body>
