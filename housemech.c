@@ -133,6 +133,8 @@ int main (int argc, const char **argv) {
     houselog_initialize ("mech", argc, argv);
     housedepositor_initialize (argc, argv);
 
+    housealmanac_tonight_ready (); // Tell we want to fetch the "tonight" set.
+
     housemech_rule_initialize (argc, argv);
     housemech_event_initialize (argc, argv);
 

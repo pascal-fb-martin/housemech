@@ -155,7 +155,7 @@ static int housemech_rule_sunset_cmd (ClientData clientData,
                                       int objc,
                                       Tcl_Obj *const objv[]) {
 
-    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housealmanac_sunset()));
+    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housealmanac_tonight_sunset()));
     return TCL_OK;
 }
 
@@ -164,7 +164,7 @@ static int housemech_rule_sunrise_cmd (ClientData clientData,
                                        int objc,
                                        Tcl_Obj *const objv[]) {
 
-    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housealmanac_sunrise()));
+    Tcl_SetObjResult (interp, Tcl_NewWideIntObj (housealmanac_tonight_sunrise()));
     return TCL_OK;
 }
 
@@ -212,7 +212,7 @@ int housemech_rule_status (char *buffer, int size) {
 }
 
 int housemech_rule_ready (void) {
-    return HouseMechReady && housealmanac_ready();
+    return HouseMechReady && housealmanac_tonight_ready();
 }
 
 int housemech_rule_trigger_event
