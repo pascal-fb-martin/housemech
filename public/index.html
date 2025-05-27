@@ -45,6 +45,11 @@ function mechUpdate (response) {
         } else {
             document.getElementById('provider').innerHTML = '';
         }
+        if (response.almanac.origin) {
+            document.getElementById('origin').innerHTML = '<a href="'+response.almanac.origin+'">'+response.almanac.origin+'</a>';
+        } else {
+            document.getElementById('origin').innerHTML = '';
+        }
         if (response.almanac.sunset) {
             var sunset = new Date (response.almanac.sunset * 1000);
             document.getElementById('sunset').innerHTML = shortTime(sunset);
@@ -119,6 +124,8 @@ window.onload = function() {
    <td><span class="housedata" id="priority"></span></td></tr>
    <tr><td>Provider:</td>
    <td><span class="housedata" id="provider"></span></td></tr>
+   <tr><td>Origin:</td>
+   <td><span class="housedata" id="origin"></span></td></tr>
    <tr><td>Sunset:</td>
    <td><span class="housedata" id="sunset"></span></td></tr>
    <tr><td>Sunrise:</td>
