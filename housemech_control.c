@@ -328,7 +328,8 @@ static void housemech_control_stop (HouseControl *control, const char *reason) {
     }
     DEBUG ("GET %s\n", url);
     echttp_submit (0, 0, housemech_control_result, (void *)control);
-    control->status  = 'i';
+    if (control->status == 'a') control->status = 'i';
+    control->deadline = 0;
 }
 
 void housemech_control_cancel (const char *name, const char *reason) {
@@ -341,18 +342,27 @@ void housemech_control_cancel (const char *name, const char *reason) {
         HouseControl *control = housemech_control_search (name);
         if (control->url[0]) {
             DEBUG ("Canceling point %s\n", name);
-            houselog_event ("CONTROL", name, "CANCEL",
-                            "USING %s (%s)", control->url, reason?reason:"");
+            // Do not generate an event if the control was not activated by
+            // this service instance: such spurious events are confusing.
+            //
+            if (control->status == 'a')
+                houselog_event ("CONTROL", name, "CANCEL", "USING %s (%s)",
+                                control->url, reason?reason:"");
+            // Event if the control was not activated by this service instance,
+            // still stop it, just to be sure.
+            //
             housemech_control_stop (control, reason);
-            control->deadline = 0;
         }
         return;
     }
     DEBUG ("%ld: Cancel all zones and feeds\n", now);
     for (i = 0; i < ControlsCount; ++i) {
-        if (Controls[i].deadline) {
+        // This is a broad cancel: as it would be too dangerous to turn off
+        // every possible control point, limit the actions to pending (active)
+        // actions initiated by this service instance only.
+        //
+        if (Controls[i].status == 'a') {
             housemech_control_stop ( Controls + i, reason);
-            Controls[i].deadline = 0;
         }
     }
     ControlsActive = 0;
@@ -467,7 +477,7 @@ int housemech_control_status (char *buffer, int size) {
     int cursor = 0;
     const char *prefix = "";
 
-    cursor = snprintf (buffer, size, "\"servers\":[");
+    cursor = snprintf (buffer, size, ",\"servers\":[");
     if (cursor >= size) goto overflow;
 
     for (i = 0; i < ProvidersCount; ++i) {
@@ -476,20 +486,19 @@ int housemech_control_status (char *buffer, int size) {
         if (cursor >= size) goto overflow;
         prefix = ",";
     }
-    cursor += snprintf (buffer+cursor, size-cursor, "]");
-    if (cursor >= size) goto overflow;
-
-    cursor += snprintf (buffer+cursor, size-cursor, ",\"controls\":[");
+    cursor += snprintf (buffer+cursor, size-cursor, "],\"controls\":[");
     if (cursor >= size) goto overflow;
     prefix = "";
 
     time_t now = time(0);
 
     for (i = 0; i < ControlsCount; ++i) {
-        int remaining =
-            (Controls[i].status == 'a')?(int)(Controls[i].deadline - now):0;
-        cursor += snprintf (buffer+cursor, size-cursor, "%s[\"%s\",\"%c\",\"%s\",%d]",
-                            prefix, Controls[i].name, Controls[i].status, Controls[i].url, remaining);
+        if (Controls[i].status != 'a') continue; // List only active controls.
+        cursor += snprintf (buffer+cursor, size-cursor,
+                            "%s[\"%s\",\"%s\",%d]",
+                            prefix, Controls[i].name,
+                            Controls[i].url,
+                            (int)(Controls[i].deadline - now));
         if (cursor >= size) goto overflow;
         prefix = ",";
     }
