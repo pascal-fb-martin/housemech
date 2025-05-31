@@ -81,20 +81,7 @@ static void housemech_background (int fd, int mode) {
     if (now == LastCall) return;
     LastCall = now;
 
-    if (echttp_dynamic_port()) {
-        static time_t Renewed = 0;
-        if (Renewed) {
-            if (now > Renewed + 60) {
-                houseportal_renew();
-                Renewed = now;
-            }
-        } else if (now % 5 == 0) {
-            static const char *path[] = {"mech:/mech"};
-            houseportal_register (echttp_port(4), path, 1);
-            Renewed = now;
-        }
-    }
-
+    houseportal_background (now);
     housediscover (now);
     houselog_background (now);
     housedepositor_periodic (now);
@@ -125,8 +112,11 @@ int main (int argc, const char **argv) {
     echttp_static_default ("-http-root=/usr/local/share/house/public");
 
     argc = echttp_open (argc, argv);
-    if (echttp_dynamic_port())
+    if (echttp_dynamic_port()) {
+        static const char *path[] = {"mech:/mech"};
         houseportal_initialize (argc, argv);
+        houseportal_declare (echttp_port(4), path, 1);
+    }
     echttp_static_initialize (argc, argv);
 
     housediscover_initialize (argc, argv);
