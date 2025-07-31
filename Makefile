@@ -16,10 +16,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
+#
+# WARNING
+#
+# This Makefile depends on echttp and houseportal (dev) being installed.
+
+prefix=/usr/local
+SHARE=$(prefix)/share/house
+
+INSTALL=/usr/bin/install
 
 HAPP=housemech
-HROOT=/usr/local
-SHARE=$(HROOT)/share/house
 
 # Application build. --------------------------------------------
 
@@ -42,41 +49,31 @@ rebuild: clean all
 	gcc -c -Wall -g -Os -I/usr/include/tcl -o $@ $<
 
 housemech: $(OBJS)
-	gcc -Os -o housemech $(OBJS) -lhouseportal -lechttp -ltcl -lssl -lcrypto -lm -lrt
+	gcc -Os -o housemech $(OBJS) -lhouseportal -lechttp -ltcl -lssl -lcrypto -lmagic -lm -lrt
 
 # Application files installation --------------------------------
 
-install-scripts:
-	mkdir -p $(SHARE)/mech
-	cp bootstrap.tcl $(SHARE)/mech
-	chmod 644 $(SHARE)/mech/*
-	chmod 755 $(SHARE) $(SHARE)/mech
+install-scripts: install-preamble
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(SHARE)/mech
+	$(INSTALL) -m 0644 bootstrap.tcl $(DESTDIR)$(SHARE)/mech
 
-install-ui:
-	mkdir -p $(SHARE)/public/mech
-	cp public/* $(SHARE)/public/mech
-	chmod 644 $(SHARE)/public/mech/*
-	chmod 755 $(SHARE) $(SHARE)/public $(SHARE)/public/mech
+install-ui: install-preamble
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(SHARE)/public/mech
+	$(INSTALL) -m 0644 public/* $(DESTDIR)$(SHARE)/public/mech
 
 install-app: install-ui install-scripts
-	mkdir -p $(HROOT)/bin
-	mkdir -p /var/lib/house
-	mkdir -p /etc/house
-	rm -f $(HROOT)/bin/housemech
-	cp housemech $(HROOT)/bin
-	chown root:root $(HROOT)/bin/housemech
-	chmod 755 $(HROOT)/bin/housemech
-	touch /etc/default/housemech
+	$(INSTALL) -m 0755 -s housemech $(DESTDIR)$(prefix)/bin
+	touch $(DESTDIR)/etc/default/housemech
 
 uninstall-app:
-	rm -rf $(SHARE)/public/mech
-	rm -rf $(SHARE)/mech
-	rm -f $(HROOT)/bin/housemech
+	rm -rf $(DESTDIR)$(SHARE)/public/mech
+	rm -rf $(DESTDIR)$(SHARE)/mech
+	rm -f $(DESTDIR)$(prefix)/bin/housemech
 
 purge-app:
 
 purge-config:
-	rm -rf /etc/default/housemech
+	rm -rf $(DESTDIR)/etc/default/housemech
 
 # System installation. ------------------------------------------
 
@@ -88,16 +85,16 @@ docker: all
 	rm -rf build
 	mkdir -p build
 	cp Dockerfile build
-	mkdir -p build$(HROOT)/bin
-	cp housemech build$(HROOT)/bin
-	mkdir -p build$(HROOT)/share/house/mech
-	cp bootstrap.tcl build$(HROOT)/share/house/mech
-	chmod 644 build$(HROOT)/share/house/mech/*
-	mkdir -p build$(HROOT)/share/house/public/mech
-	cp public/* build$(HROOT)/share/house/public/mech
-	chmod 644 build$(HROOT)/share/house/public/mech/*
-	cp $(SHARE)/public/house.css build$(HROOT)/share/house/public
-	chmod 644 build$(HROOT)/share/house/public/house.css
+	mkdir -p build$(prefix)/bin
+	cp housemech build$(prefix)/bin
+	mkdir -p build$(prefix)/share/house/mech
+	cp bootstrap.tcl build$(prefix)/share/house/mech
+	chmod 644 build$(prefix)/share/house/mech/*
+	mkdir -p build$(prefix)/share/house/public/mech
+	cp public/* build$(prefix)/share/house/public/mech
+	chmod 644 build$(prefix)/share/house/public/mech/*
+	cp $(SHARE)/public/house.css build$(prefix)/share/house/public
+	chmod 644 build$(prefix)/share/house/public/house.css
 	cd build ; docker build -t housemech .
 	rm -rf build
 
