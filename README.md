@@ -146,3 +146,19 @@ housedepositor scripts mechrules.tcl test/mechrules.tcl
 
 Run HouseMech using the `test/runmech` script. The test will stop on its own when the success criteria defined in `test/mechrules.tcl` will be met.
 
+## Debian Packaging
+
+The provided Makefile supports building private Debian packages. These are _not_ official packages:
+
+- They do not follow all Debian policies.
+
+- They are not built using Debian standard conventions and tools.
+
+- The packaging is not separate from the upstream sources, and there is
+  no source package.
+
+To build a Debian package, use the `debian-package` target:
+```
+make debian-package
+```
+

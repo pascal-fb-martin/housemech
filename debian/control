@@ -1,0 +1,16 @@
+Source: housemech
+Version: 1.0
+Section: Web servers
+Maintainer: Pascal Martin <pascal.fb.martin@gmail.com>
+Priority: optional
+Homepage: https://github.com/pascal-fb-martin/housemech
+Standard-Version: 4.7.0
+Package: housemech
+Architecture: {{arch}}
+Depends: 
+Description: A House service to automate controls based on events
+ HouseMech is part of the House suite of web services.
+ .
+ HouseMech listen to events. When a new event is detected, it executes
+ a matching script. All scripts are implemented in a Tcl file.
+
