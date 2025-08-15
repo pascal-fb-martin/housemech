@@ -40,6 +40,7 @@ proc EVENT._category_._name_._action_ {} {
     ...
 }
 ```
+
 This trigger is called when an event occurs and its category, name and action fields all match the proc name.
 
 ```
@@ -47,6 +48,7 @@ proc EVENT._category_._name_ {action} {
     ...
 }
 ```
+
 This trigger is called when an event occurs, both its category and name fields match the proc name, and there was no more specific trigger defined.
 
 ```
@@ -54,6 +56,7 @@ proc EVENT._category_ {name action} {
     ...
 }
 ```
+
 This trigger is called when an event occurs and its category field matches the proc name, and there was no more specific trigger defined.
 
 ```
@@ -61,11 +64,13 @@ proc POINT._name_ {state} {
     ...
 }
 ```
+
 This trigger is called when a control point's state changes and the point name matches the proc name.
 
 The same event detection will activate at most one trigger: HouseMech will choose the more specific trigger proc that matches, and ignore all other trigger procs.
 
 Here is an example of two triggers; the first trigger is activated upon any service event and the second trigger is activated upon state change for the control point named "testpoint":
+
 ```
 proc EVENT.SERVICE {name action} {
     puts "================ Service $name $action detected"
@@ -81,36 +86,43 @@ An automation trigger script may access the following Tcl commands:
 ```
 House::event {"state" category name}
 ```
+
 This returns the last detected action for the specified event. This can be used to execute some logic only when multiple conditions are met, i.e. after detection of a sequence or combination of events.
 
 ```
 House::event {"new" category name {action ""} {description ""}}
 ```
+
 This generates a new event.
 
 ```
 House::control {"start" name {pulse 0} {reason "HOUSEMECH TRIGGER"}}
 ```
+
 This sets the specified control point to "on". If the pulse parameter is present, it represent for how long the control point must remain on. The reason parameter will be reflected in all subsequent event related to this command.
 
 ```
 House::control {"cancel" name {reason "HOUSEMECH TRIGGER"}}
 ```
+
 This sets the specified control point to "off". The reason parameter will be reflected in all subsequent events related to this command.
 
 ```
 House::control {"state" name}
 ```
+
 This returns the known state of the control point, or an empty string if the state is not known. There might be a delay between executin a control and the state changing: the state always represent the actual state of the control point as reported by the service handling the point.
 
 ```
 House::sunset
 ```
+
 This returns the sunset time for the upcoming night (in daytime) or current night (in night time).
 
 ```
 House::sunrise
 ```
+
 This returns the sunrise time for the upcoming night (in daytime) or current night (in night time).
 
 It is night time if `( [clock seconds] > [House::sunset] ) && [clock seconds] < [House::sunrise] )`.
@@ -134,12 +146,14 @@ The HouseDepot service must be running.
 The HouseSaga service must be running (no special configuration is needed).
 
 On a separate terminal, load the SimIO test configuration _from the housetest project_ in HouseDepot and then run the housesimio service:
+
 ```
 housedepositor config simio.json simio.json
 ./housesimio
 ```
 
 Load the HouseMech test rules in HouseDepot:
+
 ```
 housedepositor scripts mechrules.tcl test/mechrules.tcl
 ```
@@ -158,6 +172,7 @@ The provided Makefile supports building private Debian packages. These are _not_
   no source package.
 
 To build a Debian package, use the `debian-package` target:
+
 ```
 make debian-package
 ```
