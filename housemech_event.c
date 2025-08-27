@@ -181,9 +181,10 @@ static void housemech_event_response
             HouseMechEventLatestTime = latesttime - 5;
         }
         free (list);
+
+        DEBUG ("New latest processed event ID %lld from %s\n",
+               HouseMechLatestId, provider);
     }
-    DEBUG ("New latest processed event ID %lld from %s\n",
-           HouseMechLatestId, provider);
 
     return;
 

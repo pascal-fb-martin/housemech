@@ -181,9 +181,10 @@ static void housemech_sensor_response
             HouseMechSensorLatestTime = latesttime - 5;
         }
         free (list);
+
+        DEBUG ("New latest processed sensor data ID %lld from %s\n",
+               HouseMechLatestId, provider);
     }
-    DEBUG ("New latest processed sensor data ID %lld from %s\n",
-           HouseMechLatestId, provider);
 
     return;
 
