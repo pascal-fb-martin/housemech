@@ -36,6 +36,7 @@
 #include "housealmanac.h"
 
 #include "housemech_event.h"
+#include "housemech_sensor.h"
 #include "housemech_rule.h"
 #include "housemech_control.h"
 
@@ -58,6 +59,7 @@ static const char *housemech_status (const char *method, const char *uri,
                        host, houseportal_server(), (long long)time(0));
 
     cursor += housemech_event_status (buffer+cursor, sizeof(buffer)-cursor);
+    cursor += housemech_sensor_status (buffer+cursor, sizeof(buffer)-cursor);
     cursor += housemech_rule_status (buffer+cursor, sizeof(buffer)-cursor);
     cursor += housealmanac_status (buffer+cursor, sizeof(buffer)-cursor);
     cursor += housemech_control_status (buffer+cursor, sizeof(buffer)-cursor);
@@ -88,6 +90,7 @@ static void housemech_background (int fd, int mode) {
     housedepositor_periodic (now);
 
     housemech_event_background (now);
+    housemech_sensor_background (now);
     housemech_control_background (now);
     housealmanac_background (now);
     housemech_rule_background (now);
@@ -127,6 +130,7 @@ int main (int argc, const char **argv) {
     housealmanac_tonight_ready (); // Tell we want to fetch the "tonight" set.
 
     housemech_rule_initialize (argc, argv);
+    housemech_sensor_initialize (argc, argv);
     housemech_event_initialize (argc, argv);
 
     echttp_route_uri ("/mech/set", housemech_set);

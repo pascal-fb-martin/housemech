@@ -26,6 +26,9 @@ int  housemech_rule_ready (void);
 int  housemech_rule_trigger_event
         (const char *category, const char *name, const char *action);
 
+int housemech_rule_trigger_sensor
+       (const char *location, const char *name, const char *value);
+
 int housemech_rule_trigger_control (const char *name, const char *state);
 
 int  housemech_rule_status (char *buffer, int size);

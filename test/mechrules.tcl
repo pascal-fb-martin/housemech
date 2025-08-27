@@ -44,3 +44,10 @@ proc POINT.mech1 {state} {
     }
 }
 
+proc SENSOR.watchs.temp.cpu {value} {
+    if {$value >= 26} {
+       puts "================ Activating fan at GaragePlug1"
+       House::control start GaragePlug1 600 "ON watchs CPU TEMP ABOVE 26"
+    }
+}
+

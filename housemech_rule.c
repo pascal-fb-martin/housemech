@@ -43,9 +43,12 @@
  * int housemech_rule_trigger_event
  *        (const char *category, const char *name, const char *action);
  *
+ * int housemech_rule_trigger_sensor
+ *        (const char *location, const char *name, const char *value);
+ *
  * int housemech_rule_trigger_control (const char *name, const char *state);
  *
- *    Process all the rule matching the specified event.
+ *    Process all the rule matching the specified change.
  */
 
 #include <string.h>
@@ -234,7 +237,7 @@ int housemech_rule_trigger_event
     // <category>.<name>.<action> (no parameter)
     // <category>.<name> <action> (where action is a parameter)
     // <category> <name> <action> (where name and action are parameters)
-    // 
+    //
     snprintf (buffer, sizeof(buffer),
               "{EVENT.%s.%s.%s}", category, name, action);
     DEBUG ("Applying rules %s\n", buffer);
@@ -255,6 +258,36 @@ int housemech_rule_trigger_event
 
     snprintf (buffer, sizeof(buffer),
               "{EVENT.%s} {%s} {%s}", category, name, action);
+    DEBUG ("Applying rules %s\n", buffer);
+    fflush (stdout);
+    if (Tcl_Eval (HouseMechInterpreter, buffer) == TCL_OK) return 1;
+
+    DEBUG ("Rule for %s failed: %s\n",
+           buffer, Tcl_GetStringResult (HouseMechInterpreter));
+    return 0;
+}
+
+int housemech_rule_trigger_sensor
+       (const char *location, const char *name, const char *value) {
+
+    char buffer[256];
+
+    // Try to process the rules for this sensor data in the following order
+    // until one is successful:
+    // <location>.<name> <value> (where value is a parameter)
+    // <location> <name> <value> (where name and value are parameters)
+    //
+    snprintf (buffer, sizeof(buffer),
+              "{SENSOR.%s.%s} {%s}", location, name, value);
+    DEBUG ("Applying rules %s\n", buffer);
+    fflush (stdout);
+    if (Tcl_Eval (HouseMechInterpreter, buffer) == TCL_OK) return 1;
+
+    DEBUG ("Rule for %s failed: %s\n",
+           buffer, Tcl_GetStringResult (HouseMechInterpreter));
+
+    snprintf (buffer, sizeof(buffer),
+              "{SENSOR.%s} {%s} {%s}", location, name, value);
     DEBUG ("Applying rules %s\n", buffer);
     fflush (stdout);
     if (Tcl_Eval (HouseMechInterpreter, buffer) == TCL_OK) return 1;

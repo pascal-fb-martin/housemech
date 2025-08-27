@@ -51,6 +51,8 @@
 #include "housemech_rule.h"
 #include "housemech_control.h"
 
+#include "housemech_event.h"
+
 #define DEBUG if (echttp_isdebug()) printf
 
 #define HOUSE_EVENT_CYCLE 2
@@ -243,6 +245,11 @@ static void housemech_event_check_response
         DEBUG ("Trying new event source %s\n", provider);
     } else {
         if (HouseMechLatestId == latestvalue) return; // No change.
+        if (HouseMechLatestId > latestvalue) {
+            // This should never happen, except if the server restarted.
+            // In that case, look at everything: this is all new.
+            HouseMechLatestId = 0;
+        }
         DEBUG ("Detected new events from %s\n", HouseMechCurrentServer);
     }
     if ((! housemech_rule_ready()) || (! housemech_control_ready())) {

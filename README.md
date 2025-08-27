@@ -29,11 +29,11 @@ To install, follow the steps below:
 
 This service loads a Tcl automation script from HouseDepot, repository "scripts" and name "mechrules.tcl".
 
-This script defines triggers that HouseMech will call when a matching event or control point change occurs. A trigger is a Tcl proc which name matches the source that caused the trigger. The match between the source and the Tcl proc is entirely based on the proc name.
+This script defines triggers that HouseMech will call when a matching event, sensor data or control point change is detected. A trigger is a Tcl proc which name matches the source that caused the trigger. The match between the source and the Tcl proc is entirely based on the proc name.
+
+### Event triggers
 
 This service uses 3 fields from an House event record: category, name and action.
-
-The following types of trigger procs can be defined:
 
 ```
 proc EVENT._category_._name_._action_ {} {
@@ -59,6 +59,28 @@ proc EVENT._category_ {name action} {
 
 This trigger is called when an event occurs and its category field matches the proc name, and there was no more specific trigger defined.
 
+### Sensor triggers
+
+This service uses 3 fields from an House sensor record: location, name and value.
+
+```
+proc SENSOR._location_._name_ {value} {
+    ...
+}
+```
+
+This trigger is called when new data is available from the specified sensor and both the sensor's location and name fields match the proc name.
+
+```
+proc SENSOR._location_ {name value} {
+    ...
+}
+```
+
+This trigger is called when new data is available from the specified sensor, the sensor's location field matches the proc name, and there was no more specific trigger defined.
+
+### Control point triggers
+
 ```
 proc POINT._name_ {state} {
     ...
@@ -80,6 +102,8 @@ proc POINT.testpoint {state} {
     puts "================ Control point testpoint changed to $state"
 }
 ```
+
+### HouseMech Tcl API
 
 An automation trigger script may access the following Tcl commands:
 

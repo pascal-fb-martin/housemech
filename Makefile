@@ -33,6 +33,7 @@ HCAT=automation
 
 OBJS=housemech.o \
      housemech_event.o \
+     housemech_sensor.o \
      housemech_rule.o \
      housemech_control.o
 LIBOJS=
