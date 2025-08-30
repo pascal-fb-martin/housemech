@@ -39,11 +39,12 @@
  *    The purpose is to delay rules execution until at least one control
  *    service has been detected.
  *
- * int housemech_control_start (const char *name,
- *                              int pulse, const char *reason);
+ * int housemech_control_start (const char *name, int pulse,
+ *                              const char *reason, int verbose);
  *
  *    Activate one control for the duration set by pulse. The reason
- *    typically indicates what triggered this control.
+ *    typically indicates what triggered this control. The verbose
+ *    parameter controls the local generation of an event.
  *
  *    If the named control is not known on any server, the request is ignored.
  *
@@ -267,7 +268,8 @@ static const char *housemech_control_cause (const char * reason) {
     return Cause;
 }
 
-int housemech_control_start (const char *name, int pulse, const char *reason) {
+int housemech_control_start (const char *name, int pulse,
+                             const char *reason, int verbose) {
 
     time_t now = time(0);
     DEBUG ("%ld: Start %s for %d seconds\n", now, name, pulse);
@@ -279,14 +281,16 @@ int housemech_control_start (const char *name, int pulse, const char *reason) {
     }
 
     if (!reason) reason = "";
-    if (pulse) {
-        houselog_event ("CONTROL", name, "ACTIVATED",
-                        "FOR %s USING %s (%s)",
-                        housemech_printable_duration (pulse),
-                        control->url, reason);
-    } else {
-        houselog_event ("CONTROL", name, "ACTIVATED",
-                        "USING %s (%s)", control->url, reason);
+    if (verbose) {
+        if (pulse) {
+            houselog_event ("CONTROL", name, "ACTIVATED",
+                            "FOR %s USING %s (%s)",
+                            housemech_printable_duration (pulse),
+                            control->url, reason);
+        } else {
+            houselog_event ("CONTROL", name, "ACTIVATED",
+                            "USING %s (%s)", control->url, reason);
+        }
     }
 
     char encoded[64];

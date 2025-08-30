@@ -105,6 +105,17 @@ static int housemech_rule_control_cmd (ClientData clientData,
 
     const char *reason = "HOUSEMECH TRIGGER";
 
+    if (objc < 2) {
+        Tcl_SetResult (interp, "no parameters", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    int verbose = 0;
+    if (!strcmp ("verbose", Tcl_GetString (objv[1]))) {
+       verbose = 1;
+       objc -= 1;
+       objv += 1;
+    }
+
     if (objc < 3) {
         Tcl_SetResult (interp, "missing parameters", TCL_STATIC);
         return TCL_ERROR;
@@ -134,7 +145,7 @@ static int housemech_rule_control_cmd (ClientData clientData,
                 if (userreason) reason = userreason;
             }
         }
-        if (!housemech_control_start (name, pulse, reason)) {
+        if (!housemech_control_start (name, pulse, reason, verbose)) {
             Tcl_SetResult (interp, "control failure", TCL_STATIC);
             return TCL_ERROR;
         }
