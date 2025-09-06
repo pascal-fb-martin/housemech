@@ -34,6 +34,7 @@
 #include "houselog.h"
 #include "houselog_sensor.h"
 #include "housealmanac.h"
+#include "housecapture.h"
 
 #include "housemech_event.h"
 #include "housemech_sensor.h"
@@ -88,6 +89,7 @@ static void housemech_background (int fd, int mode) {
     housediscover (now);
     houselog_background (now);
     housedepositor_periodic (now);
+    housecapture_background (now);
 
     housemech_event_background (now);
     housemech_sensor_background (now);
@@ -126,6 +128,7 @@ int main (int argc, const char **argv) {
     housediscover_initialize (argc, argv);
     houselog_initialize ("mech", argc, argv);
     housedepositor_initialize (argc, argv);
+    housecapture_initialize ("/mech", argc, argv);
 
     housealmanac_tonight_ready (); // Tell we want to fetch the "tonight" set.
 
