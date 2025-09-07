@@ -284,11 +284,11 @@ int housemech_rule_trigger_event
 
     DEBUG ("Rule for %s failed: %s\n",
            buffer, Tcl_GetStringResult (HouseMechInterpreter));
-    housecapture_record (EventCapture, "IGNORE", buffer);
+    housecapture_record (EventCapture, name, "IGNORE", buffer);
     return 0;
 
 success:
-    housecapture_record (EventCapture, "TRIGGER", buffer);
+    housecapture_record (EventCapture, name, "TRIGGER", buffer);
     return 1;
 }
 
@@ -312,18 +312,18 @@ int housemech_rule_trigger_sensor
            buffer, Tcl_GetStringResult (HouseMechInterpreter));
 
     snprintf (buffer, sizeof(buffer),
-              "{SENSOR.%s} {%s} {%s}", location, name, value);
+              "{SENSOR.%s} {%s} {%s}", name, location, value);
     DEBUG ("Applying rules %s\n", buffer);
     fflush (stdout);
     if (Tcl_Eval (HouseMechInterpreter, buffer) == TCL_OK) goto success;
 
     DEBUG ("Rule for %s failed: %s\n",
            buffer, Tcl_GetStringResult (HouseMechInterpreter));
-    housecapture_record (SensorCapture, "IGNORE", buffer);
+    housecapture_record (SensorCapture, name, "IGNORE", buffer);
     return 0;
 
 success:
-    housecapture_record (SensorCapture, "TRIGGER", buffer);
+    housecapture_record (SensorCapture, name, "TRIGGER", buffer);
     return 1;
 }
 
@@ -337,11 +337,11 @@ int housemech_rule_trigger_control (const char *name, const char *state) {
 
     DEBUG ("Rule %s failed: %s\n",
            buffer, Tcl_GetStringResult (HouseMechInterpreter));
-    housecapture_record (ControlCapture, "IGNORE", buffer);
+    housecapture_record (ControlCapture, name, "IGNORE", buffer);
     return 0;
 
 success:
-    housecapture_record (ControlCapture, "TRIGGER", buffer);
+    housecapture_record (ControlCapture, name, "TRIGGER", buffer);
     return 1;
 }
 

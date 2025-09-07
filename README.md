@@ -72,12 +72,12 @@ proc SENSOR._location_._name_ {value} {
 This trigger is called when new data is available from the specified sensor and both the sensor's location and name fields match the proc name.
 
 ```
-proc SENSOR._location_ {name value} {
+proc SENSOR._name_ {location value} {
     ...
 }
 ```
 
-This trigger is called when new data is available from the specified sensor, the sensor's location field matches the proc name, and there was no more specific trigger defined.
+This trigger is called when new data is available from the specified sensor, the sensor's name field matches the proc name, and there was no more specific trigger defined.
 
 ### Control point triggers
 
