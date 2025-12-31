@@ -103,6 +103,21 @@ static int housemech_rule_event_cmd (ClientData clientData,
     return TCL_OK;
 }
 
+static int housemech_rule_get_pulse (Tcl_Interp *interp, Tcl_Obj *obj) {
+
+    int pulse;
+    if (Tcl_GetIntFromObj (interp, obj, &pulse) != TCL_OK) {
+        DEBUG ("Invalid pulse %s: %s\n", Tcl_GetString (obj), Tcl_GetStringResult(interp));
+        Tcl_SetResult (interp, "invalid pulse", TCL_STATIC);
+        return -1;
+    }
+    if (pulse < 0) {
+        Tcl_SetResult (interp, "invalid pulse range", TCL_STATIC);
+        return -1;
+    }
+    return pulse;
+}
+
 static int housemech_rule_control_cmd (ClientData clientData,
                                        Tcl_Interp *interp,
                                        int objc,
@@ -136,15 +151,8 @@ static int housemech_rule_control_cmd (ClientData clientData,
     if (!strcmp ("start", cmd)) {
         int pulse = 0;
         if (objc >= 4) {
-            if (Tcl_GetIntFromObj (interp, objv[3], &pulse) != TCL_OK) {
-                DEBUG ("Invalid pulse %s: %s\n", Tcl_GetString (objv[3]), Tcl_GetStringResult(interp));
-                Tcl_SetResult (interp, "invalid pulse", TCL_STATIC);
-                return TCL_ERROR;
-            }
-            if (pulse < 0) {
-                Tcl_SetResult (interp, "invalid pulse range", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            pulse = housemech_rule_get_pulse (interp, objv[3]);
+            if (pulse < 0) return TCL_ERROR;
             if (objc >= 5) {
                 const char *userreason = Tcl_GetString (objv[4]);
                 if (userreason) reason = userreason;
@@ -154,14 +162,37 @@ static int housemech_rule_control_cmd (ClientData clientData,
             Tcl_SetResult (interp, "control failure", TCL_STATIC);
             return TCL_ERROR;
         }
+
+    } else if (!strcmp ("set", cmd)) {
+        if (objc < 4) {
+            Tcl_SetResult (interp, "missing state", TCL_STATIC);
+            return TCL_ERROR;
+        }
+        int pulse = 0;
+        if (objc >= 5) {
+            pulse = housemech_rule_get_pulse (interp, objv[4]);
+            if (pulse < 0) return TCL_ERROR;
+            if (objc >= 6) {
+                const char *userreason = Tcl_GetString (objv[5]);
+                if (userreason) reason = userreason;
+            }
+        }
+        if (!housemech_control_set
+                 (name, Tcl_GetString (objv[3]), pulse, reason, verbose)) {
+            Tcl_SetResult (interp, "control failure", TCL_STATIC);
+            return TCL_ERROR;
+        }
+
     } else if (!strcmp ("cancel", cmd)) {
         if (objc >= 4) {
             const char *userreason = Tcl_GetString (objv[3]);
             if (userreason) reason = userreason;
         }
         housemech_control_cancel (name, reason);
+
     } else if (!strcmp ("state", cmd)) {
         Tcl_SetResult (interp, (char *)housemech_control_state (name), TCL_VOLATILE);
+
     } else {
         Tcl_SetResult (interp, "invalid subcommand", TCL_STATIC);
         return TCL_ERROR;

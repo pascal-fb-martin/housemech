@@ -39,18 +39,26 @@
  *    The purpose is to delay rules execution until at least one control
  *    service has been detected.
  *
+ * void housemech_control_set (const char *name, const char *state,
+ *                             int pulse, const char *reason, int verbose);
+ *
+ *    Set a control to the specified state for the duration of the pulse.
+ *    The reason typically indicates what triggered this control. The verbose
+ *    parameter controls the local generation of an event..
+ *
+ *    If the named control is not known on any server, the request is ignored.
+ *
  * int housemech_control_start (const char *name, int pulse,
  *                              const char *reason, int verbose);
  *
- *    Activate one control for the duration set by pulse. The reason
- *    typically indicates what triggered this control. The verbose
- *    parameter controls the local generation of an event.
+ *    This function is equivalent to housemech_control_set() with state "on".
  *
  *    If the named control is not known on any server, the request is ignored.
  *
  * void housemech_control_cancel (const char *name, const char *reason);
  *
  *    Immediately stop a control, or all active controls if name is null.
+ *    To stop a control means to set it to "off".
  *
  * const char *housemech_control_state (const char *name);
  *
@@ -224,26 +232,28 @@ static void housemech_control_result
 }
 
 static const char *housemech_printable_period (int h, const char *hlabel,
-                                           int l, const char *llabel) {
+                                               int l, const char *llabel) {
     static char Printable[128];
     if (l > 0) {
         snprintf (Printable, sizeof(Printable),
-                  "%d %s%s, %d %s%s", h, hlabel, (h>1)?"S":"",
+                  "FOR %d %s%s, %d %s%s ", h, hlabel, (h>1)?"S":"",
                                       l, llabel, (l>1)?"S":"");
     } else {
         snprintf (Printable, sizeof(Printable),
-                  "%d %s%s", h, hlabel, (h>1)?"S":"");
+                  "FOR %d %s%s ", h, hlabel, (h>1)?"S":"");
     }
     return Printable;
 }
 
 static const char *housemech_printable_duration (int duration) {
 
-    if (duration <= 0) return "NOW";
+    if (duration <= 0) return "";
     if (duration > 86400) {
+        duration += 1800; // Rounding.
         return housemech_printable_period (duration / 86400, "DAY",
                                            (duration % 86400) / 3600, "HOUR");
     } else if (duration > 3600) {
+        duration += 30; // Rounding.
         return housemech_printable_period (duration / 3600, "HOUR",
                                            (duration % 3600) / 60, "MINUTE");
     } else if (duration > 60) {
@@ -251,6 +261,17 @@ static const char *housemech_printable_duration (int duration) {
                                            duration % 60, "SECOND");
     }
     return housemech_printable_period (duration, "SECOND", 0, "");
+}
+
+static const char *housemech_printable_reason (const char *reason) {
+
+    static char Printable[128];
+    if (reason && (*reason > 0)) {
+        snprintf (Printable, sizeof(Printable), " (%s)", reason);
+    } else {
+        Printable[0] = 0;
+    }
+    return Printable;
 }
 
 int housemech_control_ready (void) {
@@ -268,11 +289,11 @@ static const char *housemech_control_cause (const char * reason) {
     return Cause;
 }
 
-int housemech_control_start (const char *name, int pulse,
-                             const char *reason, int verbose) {
+int housemech_control_set (const char *name, const char *state,
+                           int pulse, const char *reason, int verbose) {
 
     time_t now = time(0);
-    DEBUG ("%ld: Start %s for %d seconds\n", now, name, pulse);
+    DEBUG ("%ld: Set %s to %s for %d seconds\n", now, name, state, pulse);
 
     HouseControl *control = housemech_control_search (name);
     if (! control->url[0]) {
@@ -282,15 +303,10 @@ int housemech_control_start (const char *name, int pulse,
 
     if (!reason) reason = "";
     if (verbose) {
-        if (pulse) {
-            houselog_event ("CONTROL", name, "ACTIVATED",
-                            "FOR %s USING %s (%s)",
-                            housemech_printable_duration (pulse),
-                            control->url, reason);
-        } else {
-            houselog_event ("CONTROL", name, "ACTIVATED",
-                            "USING %s (%s)", control->url, reason);
-        }
+        houselog_event ("CONTROL", name, state, "%sUSING %s%s",
+                        housemech_printable_duration (pulse),
+                        control->url,
+                        housemech_printable_reason (reason));
     }
 
     char encoded[64];
@@ -298,8 +314,9 @@ int housemech_control_start (const char *name, int pulse,
 
     static char url[800];
     snprintf (url, sizeof(url),
-              "%s/set?point=%s&state=on&pulse=%d%s",
-              control->url, encoded, pulse, housemech_control_cause(reason));
+              "%s/set?point=%s&state=%s&pulse=%d%s",
+              control->url, encoded, state, pulse,
+              housemech_control_cause(reason));
     const char *error = echttp_client ("GET", url);
     if (error) {
         houselog_trace (HOUSE_FAILURE, name, "cannot create socket for %s, %s", url, error);
@@ -312,6 +329,11 @@ int housemech_control_start (const char *name, int pulse,
     control->status = 'a';
     ControlsActive = 1;
     return 1;
+}
+
+int housemech_control_start (const char *name, int pulse,
+                             const char *reason, int verbose) {
+    return housemech_control_set (name, "on", pulse, reason, verbose);
 }
 
 static void housemech_control_stop (HouseControl *control, const char *reason) {
@@ -350,8 +372,9 @@ void housemech_control_cancel (const char *name, const char *reason) {
             // this service instance: such spurious events are confusing.
             //
             if (control->status == 'a')
-                houselog_event ("CONTROL", name, "CANCEL", "USING %s (%s)",
-                                control->url, reason?reason:"");
+                houselog_event ("CONTROL", name, "CANCEL", "USING %s%s",
+                                control->url,
+                                housemech_printable_reason (reason));
             // Event if the control was not activated by this service instance,
             // still stop it, just to be sure.
             //

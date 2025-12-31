@@ -120,10 +120,16 @@ House::event {"new" category name {action ""} {description ""}}
 This generates a new event.
 
 ```
+House::control {["verbose"] "set" name state {pulse 0} {reason "HOUSEMECH TRIGGER"}}
+```
+
+This sets the specified control point to the specified state. If the pulse parameter is present, it represents how long the control point must remain in the specified state. Once the pulse has expired, the point state automatically changes to `off`. The reason parameter will be reflected in any subsequent event related to this command. if the first parameter is `verbose`, an event is generated locally that describes the control to be activated. This can help with troubleshooting when controls do not go through.
+
+```
 House::control {["verbose"] "start" name {pulse 0} {reason "HOUSEMECH TRIGGER"}}
 ```
 
-This sets the specified control point to "on". If the pulse parameter is present, it represents how long the control point must remain on. The reason parameter will be reflected in any subsequent event related to this command. if the first parameter is `verbose`, an event is generated locally that describes the control to be activated. This can help with troubleshooting when controls do not go through.
+This is equivalent to the `set` command above with `state` set to `on`.
 
 ```
 House::control {"cancel" name {reason "HOUSEMECH TRIGGER"}}

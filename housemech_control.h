@@ -22,8 +22,10 @@
  */
 int housemech_control_ready (void);
 
-int housemech_control_start   (const char *name, int pulse,
-                               const char *reason, int verbose);
+int housemech_control_set     (const char *name, const char *state,
+                               int pulse, const char *reason, int verbose);
+int housemech_control_start   (const char *name,
+                               int pulse, const char *reason, int verbose);
 void housemech_control_cancel (const char *name, const char *reason);
 
 const char *housemech_control_state  (const char *name);
