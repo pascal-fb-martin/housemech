@@ -171,9 +171,15 @@ This service does not really have a web interface at this time, beside accessing
 
 ## Test
 
-The HouseDepot service must be running.
+The HouseDepot service must be running (no special configuration is needed).
 
 The HouseSaga service must be running (no special configuration is needed).
+
+The HouseSimio service must _not_ be running. If it is running, stop it:
+
+```
+sudo systemctl stop housesimio
+```
 
 From a first terminal, launch housesimio:
 
@@ -187,9 +193,13 @@ From a second terminal, launch housemech:
 test/runmech
 ```
 
-The housemech program will stop on its own when the success criteria defined in `test/mechrules.tcl` will be met. The two programs are run in debug mode, and the output is saved in donocommit/simio.txt and donotcommit/mech.txt respectively.
+The housemech program will stop on its own when the success criteria defined in `test/mechrules.tcl` will be met. The two programs are run in debug mode and their output is saved in donocommit/simio.txt and donotcommit/mech.txt respectively.
 
-You will need to stop housesimio.
+You will need to stop housesimio manually. If housesimio was running as a service prior to the test, you will need to restart it:
+
+```
+sudo systemctl start housesimio
+```
 
 ## Debian Packaging
 
