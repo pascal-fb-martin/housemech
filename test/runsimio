@@ -1,0 +1,7 @@
+#!/bin/bash
+cd `dirname $0`
+/usr/bin/echo "=== Loading the latest simio configuration"
+/usr/local/bin/housedepositor --group=mechtest config simio.json simio.json
+/usr/bin/echo "=== Running housesimio"
+../../housetest/housesimio --http-debug --group=mechtest | tee ../donotcommit/simio.txt
+

@@ -1,4 +1,7 @@
 #!/bin/bash
 cd `dirname $0`
-../housemech --http-debug --group=test | tee ../donotcommit/output.txt
+/usr/bin/echo "=== Loading the latest housemech test script"
+/usr/local/bin/housedepositor --group=mechtest scripts mechrules.tcl mechrules.tcl
+/usr/bin/echo "=== Running housemech"
+../housemech --http-debug --group=mechtest | tee ../donotcommit/mech.txt
 

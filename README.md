@@ -175,20 +175,21 @@ The HouseDepot service must be running.
 
 The HouseSaga service must be running (no special configuration is needed).
 
-On a separate terminal, load the SimIO test configuration _from the housetest project_ in HouseDepot and then run the housesimio service:
+From a first terminal, launch housesimio:
 
 ```
-housedepositor config simio.json simio.json
-./housesimio
+test/runsimio
 ```
 
-Load the HouseMech test rules in HouseDepot:
+From a second terminal, launch housemech:
 
 ```
-housedepositor scripts mechrules.tcl test/mechrules.tcl
+test/runmech
 ```
 
-Run HouseMech using the `test/runmech` script. The test will stop on its own when the success criteria defined in `test/mechrules.tcl` will be met.
+The housemech program will stop on its own when the success criteria defined in `test/mechrules.tcl` will be met. The two programs are run in debug mode, and the output is saved in donocommit/simio.txt and donotcommit/mech.txt respectively.
+
+You will need to stop housesimio.
 
 ## Debian Packaging
 
