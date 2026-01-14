@@ -146,7 +146,7 @@ static void housemech_sensor_response
         long long latesttime = 0;
 
         int *list = calloc (n, sizeof(int));
-        const char *error = echttp_json_enumerate (tokens+Sensors, list);
+        const char *error = echttp_json_enumerate (tokens+Sensors, list, n);
         if (!error) {
             int i;
             for (i = n - 1; i >= 0; --i) {

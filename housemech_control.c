@@ -149,7 +149,6 @@ static ParserToken *housemech_control_prepare (int count) {
 static void housemech_control_update (const char *provider,
                                       char *data, int length) {
 
-   int  innerlist[256];
    char path[256];
    int  i;
 
@@ -179,10 +178,11 @@ static void housemech_control_update (const char *provider,
        return;
    }
 
-   error = echttp_json_enumerate (tokens+controls, innerlist);
+   int *innerlist = calloc (n, sizeof(int));
+   error = echttp_json_enumerate (tokens+controls, innerlist, n);
    if (error) {
        houselog_trace (HOUSE_FAILURE, path, "%s", error);
-       return;
+       goto cleanup;
    }
 
    for (i = 0; i < n; ++i) {
@@ -209,6 +209,9 @@ static void housemech_control_update (const char *provider,
            }
        }
    }
+
+cleanup:
+   free (innerlist);
 }
 
 static void housemech_control_result
