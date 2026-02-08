@@ -296,7 +296,8 @@ int housemech_control_set (const char *name, const char *state,
                            int pulse, const char *reason, int verbose) {
 
     time_t now = time(0);
-    DEBUG ("%ld: Set %s to %s for %d seconds\n", now, name, state, pulse);
+    DEBUG ("%lld: Set %s to %s for %d seconds\n",
+           (long long)now, name, state, pulse);
 
     HouseControl *control = housemech_control_search (name);
     if (! control->url[0]) {
@@ -385,7 +386,7 @@ void housemech_control_cancel (const char *name, const char *reason) {
         }
         return;
     }
-    DEBUG ("%ld: Cancel all zones and feeds\n", now);
+    DEBUG ("%lld: Cancel all zones and feeds\n", (long long)now);
     for (i = 0; i < ControlsCount; ++i) {
         // This is a broad cancel: as it would be too dangerous to turn off
         // every possible control point, limit the actions to pending (active)
