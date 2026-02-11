@@ -81,7 +81,7 @@ purge-config:
 
 # Build a private Debian package. -------------------------------
 
-install-package: install-ui install-runtime install-systemd
+install-package: install-app install-systemd
 
 debian-package: debian-package-generic
 
