@@ -173,10 +173,7 @@ static void housemech_control_update (const char *provider,
    }
 
    int n = tokens[controls].length;
-   if (n <= 0) {
-       houselog_trace (HOUSE_FAILURE, provider, "empty control data");
-       return;
-   }
+   if (n <= 0) return;
 
    int *innerlist = calloc (n, sizeof(int));
    error = echttp_json_enumerate (tokens+controls, innerlist, n);
