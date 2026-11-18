@@ -149,16 +149,13 @@ static ParserToken *housemech_control_prepare (int count) {
 static void housemech_control_update (const char *provider,
                                       char *data, int length) {
 
-   char path[256];
-   int  i;
-
    int count = echttp_json_estimate(data);
    ParserToken *tokens = housemech_control_prepare (count);
 
    const char *error = echttp_json_parse (data, tokens, &count);
    if (error) {
        houselog_trace
-           (HOUSE_FAILURE, provider, "JSON syntax error, %s", error);
+           (HOUSE_FAILURE, provider, "JSON syntax error: %s", error);
        return;
    }
    if (count <= 0) {
@@ -178,10 +175,12 @@ static void housemech_control_update (const char *provider,
    int *innerlist = calloc (n, sizeof(int));
    error = echttp_json_enumerate (tokens+controls, innerlist, n);
    if (error) {
-       houselog_trace (HOUSE_FAILURE, path, "%s", error);
+       houselog_trace (HOUSE_FAILURE, ".control.status",
+                       "Cannot enumerate: %s", error);
        goto cleanup;
    }
 
+   int  i;
    for (i = 0; i < n; ++i) {
        ParserToken *inner = tokens + controls + innerlist[i];
        HouseControl *control = housemech_control_search (inner->key);
@@ -224,7 +223,8 @@ static void housemech_control_result
 
    if (status != 200) {
        if (control->status != 'e')
-           houselog_trace (HOUSE_FAILURE, control->name, "HTTP code %d", status);
+           houselog_trace (HOUSE_FAILURE, control->name,
+                           "HTTP %d %s", status, echttp_reason());
        control->status  = 'e';
        control->deadline  = 0;
    }
@@ -320,7 +320,8 @@ int housemech_control_set (const char *name, const char *state,
               housemech_control_cause(reason));
     const char *error = echttp_client ("GET", url);
     if (error) {
-        houselog_trace (HOUSE_FAILURE, name, "cannot create socket for %s, %s", url, error);
+        houselog_trace (HOUSE_FAILURE, name,
+                        "cannot issue request %s: %s", url, error);
         return 0;
     }
     DEBUG ("GET %s\n", url);
@@ -350,7 +351,8 @@ static void housemech_control_stop (HouseControl *control, const char *reason) {
               control->url, encoded, housemech_control_cause(reason));
     const char *error = echttp_client ("GET", url);
     if (error) {
-        houselog_trace (HOUSE_FAILURE, control->name, "cannot create socket for %s, %s", url, error);
+        houselog_trace (HOUSE_FAILURE, control->name,
+                        "cannot issue request %s: %s", url, error);
         return;
     }
     DEBUG ("GET %s\n", url);
@@ -414,7 +416,8 @@ static void housemech_control_discovered
    }
 
    if (status != 200) {
-       houselog_trace (HOUSE_FAILURE, provider, "HTTP error %d", status);
+       houselog_trace (HOUSE_FAILURE, provider,
+                       "HTTP %d %s", status, echttp_reason());
        return;
    }
 
@@ -437,7 +440,8 @@ static void housemech_control_scan_server
     DEBUG ("Attempting discovery at %s\n", url);
     const char *error = echttp_client ("GET", url);
     if (error) {
-        houselog_trace (HOUSE_FAILURE, provider, "%s", error);
+        houselog_trace (HOUSE_FAILURE, provider,
+                        "Cannot issue request %s: %s", url, error);
         return;
     }
     echttp_submit (0, 0, housemech_control_discovered, (void *)provider);
@@ -538,7 +542,7 @@ int housemech_control_status (char *buffer, int size) {
 
 overflow:
     houselog_trace (HOUSE_FAILURE, "STATUS",
-                    "BUFFER TOO SMALL (NEED %d bytes)", cursor);
+                    "Buffer too small (need %d bytes)", cursor);
     buffer[0] = 0;
     return 0;
 }

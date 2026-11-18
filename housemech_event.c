@@ -104,7 +104,8 @@ static void housemech_event_response
     }
 
     if (status != 200) {
-        houselog_trace (HOUSE_FAILURE, provider, "HTTP code %d", status);
+        houselog_trace (HOUSE_FAILURE, provider,
+                        "HTTP %d %s", status, echttp_reason());
         goto failure;
     }
 
@@ -210,7 +211,8 @@ static void housemech_event_check_response
     }
 
     if (status != 200) {
-        houselog_trace (HOUSE_FAILURE, provider, "HTTP code %d", status);
+        houselog_trace (HOUSE_FAILURE, provider,
+                        "HTTP %d %s", status, echttp_reason());
         goto failure;
     }
 
