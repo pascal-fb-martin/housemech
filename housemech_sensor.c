@@ -103,11 +103,12 @@ static void housemech_sensor_response
         return;
     }
 
-    if (status != 200) {
-        houselog_trace (HOUSE_FAILURE, provider,
-                        "HTTP %d %s", status, echttp_reason());
+    if (!ECHTTP_SUCCESS(status)) {
+        houselog_trace (HOUSE_FAILURE, "sensor",
+                        "%s: HTTP %d %s", provider, status, echttp_reason());
         goto failure;
     }
+    if (!data || !length) return; // No data to parse
 
     int count = echttp_json_estimate(data);
     ParserToken *tokens = housemech_sensor_prepare (count);
@@ -210,11 +211,12 @@ static void housemech_sensor_check_response
         return;
     }
 
-    if (status != 200) {
-        houselog_trace (HOUSE_FAILURE, provider,
-                        "HTTP %d %s", status, echttp_reason());
+    if (!ECHTTP_SUCCESS(status)) {
+        houselog_trace (HOUSE_FAILURE, "sensor",
+                        "%s: HTTP %d %s", provider, status, echttp_reason());
         goto failure;
     }
+    if (!data || !length) return; // No data to parse
 
     int count = echttp_json_estimate(data);
     ParserToken *tokens = housemech_sensor_prepare (count);

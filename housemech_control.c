@@ -221,14 +221,14 @@ static void housemech_control_result
        return;
    }
 
-   if (status != 200) {
+   if (!ECHTTP_SUCCESS(status)) {
        if (control->status != 'e')
-           houselog_trace (HOUSE_FAILURE, control->name,
-                           "HTTP %d %s", status, echttp_reason());
+           houselog_trace (HOUSE_FAILURE, "control", "%s: HTTP %d %s",
+                           control->name, status, echttp_reason());
        control->status  = 'e';
        control->deadline  = 0;
    }
-   housemech_control_update (control->url, data, length);
+   if (data && length) housemech_control_update (control->url, data, length);
 }
 
 static const char *housemech_printable_period (int h, const char *hlabel,
@@ -415,13 +415,13 @@ static void housemech_control_discovered
        return;
    }
 
-   if (status != 200) {
-       houselog_trace (HOUSE_FAILURE, provider,
-                       "HTTP %d %s", status, echttp_reason());
+   if (!ECHTTP_SUCCESS(status)) {
+       houselog_trace (HOUSE_FAILURE, "scan",
+                       "%s: HTTP %d %s", provider, status, echttp_reason());
        return;
    }
 
-   housemech_control_update (provider, data, length);
+   if (data && length) housemech_control_update (provider, data, length);
 }
 
 static void housemech_control_scan_server
